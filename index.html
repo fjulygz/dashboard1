@@ -197,7 +197,7 @@
             flex-grow: 1;
             padding: 20px;
             width: calc(100% - 60px);
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
@@ -348,7 +348,8 @@
            RESPONSIVE DESIGN 
            ================================================== */
         
-        @media (max-width: 1100px) {
+        /* 1. สำหรับหน้าจอเล็กกว่า Desktop ทั่วไป (เช่น iPad แนวนอน) */
+        @media (max-width: 1200px) {
             .grid-dashboard { grid-template-columns: 1fr 1fr; }
             .grid-dashboard > div:nth-child(3) {
                 grid-column: span 2; 
@@ -356,9 +357,11 @@
             }
         }
 
-        @media (max-width: 820px) {
+        /* 2. สำหรับ Tablet แนวตั้ง และ โทรศัพท์มือถือแนวนอน */
+        @media (max-width: 1024px) {
             .main-title { font-size: 24px; }
             
+            /* ดัน Sidebar ไว้ด้านบนสุด */
             .dashboard-layout { flex-direction: column; }
             .sidebar {
                 width: 100%;
@@ -373,52 +376,71 @@
                 z-index: 100;
             }
             .dashboard-content { width: 100%; padding: 15px; }
-            .dash-header { flex-direction: column; align-items: flex-start; }
-            .request-btn { width: 100%; }
+            .dash-header { flex-direction: row; align-items: center; }
             .risk-banner { font-size: 22px; margin-bottom: 20px; }
             
+            /* ปรับ Grid เป็น 1 คอลัมน์ยาวลงมา */
             .grid-dashboard { grid-template-columns: 1fr; }
             
-            /* --- ทำให้กล่อง 3 กล่องเรียงแนวนอนในมือถือ --- */
+            /* กล่องตัวเลข 3 กล่องเรียงแนวนอน */
             .stat-group {
                 flex-direction: row !important; 
             }
             .stat-group .dash-card {
                 padding: 15px 10px;
-                justify-content: flex-start;
+                justify-content: center;
+                align-items: center;
             }
             .stat-group h3 {
-                font-size: 12px;
+                font-size: 13px;
                 margin-bottom: 5px;
             }
-            .stat-value { font-size: 20px; }
+            .stat-value { font-size: 24px; }
 
-            /* --- ทำให้กราฟโดนัท 2 อันเรียงแนวนอนในมือถือ --- */
+            /* กราฟโดนัท 2 อันเรียงแนวนอน */
             .donut-group {
                 flex-direction: row !important;
             }
             .donut-group .dash-card {
                 padding: 10px;
             }
-            .donut-container { height: 140px; }
+            .donut-container { height: 160px; }
 
-            /* --- กราฟเส้น/แท่งเรียงแนวตั้งปกติ --- */
+            /* กราฟเส้นและแท่ง เรียงแนวตั้ง */
             .grid-dashboard > div:nth-child(3) {
                 grid-column: span 1;
                 flex-direction: column !important; 
             }
         }
 
-        @media (max-width: 480px) {
+        /* 3. พิเศษ: สำหรับโทรศัพท์มือถือ "แนวนอน" ที่จอเตี้ยมากๆ */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .sidebar { height: 50px; }
+            .dash-header { margin-bottom: 10px; }
+            .chart-container, .donut-container { height: 180px; } /* ลดความสูงกราฟลง */
+        }
+
+        /* 4. สำหรับโทรศัพท์มือถือแนวตั้ง (จอแคบกว่า 600px) */
+        @media (max-width: 600px) {
             .emp-card { flex-direction: column; text-align: center; padding: 20px 15px; position: relative; }
             .emp-card img { margin: 0 0 15px 0; }
             .emp-info { align-items: center; width: 100%; margin-bottom: 10px; }
             .arrow-btn { position: absolute; bottom: 15px; right: 15px; }
-            .chart-container { height: 200px; }
             
-            /* หากหน้าจอมือถือเล็กมาก ย่อฟอนต์ให้อีกเพื่อไม่ให้ล้น */
-            .stat-group h3 { font-size: 10px; }
-            .stat-value { font-size: 16px; }
+            .dash-header { flex-direction: column; align-items: flex-start; }
+            .request-btn { width: 100%; }
+
+            /* กล่องตัวเลข เปลี่ยนกลับมาเป็นแนวตั้งสำหรับมือถือจอเล็ก */
+            .stat-group { flex-direction: column !important; }
+            
+            /* กราฟโดนัท เปลี่ยนกลับมาเป็นแนวตั้ง */
+            .donut-group { flex-direction: column !important; }
+            
+            .chart-container { height: 200px; }
+            .donut-container { height: 200px; max-width: 100%; }
+            
+            .stat-group h3 { font-size: 14px; }
+            .stat-value { font-size: 28px; }
         }
     </style>
 </head>
