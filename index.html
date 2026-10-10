@@ -197,7 +197,7 @@
             flex-grow: 1;
             padding: 20px;
             width: calc(100% - 60px);
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
         }
 
@@ -288,11 +288,12 @@
             width: 100%;
         }
 
-        /* Group Classes สำหรับจัดโครงสร้างให้ยืดหยุ่น */
+        /* --- กรุ๊ปกล่องเพื่อรองรับ Responsive --- */
         .stat-group, .chart-group {
             display: flex;
             flex-direction: column;
             gap: 15px;
+            min-width: 0; /* ห้ามกล่องกลุ่มขยายตามกราฟ */
         }
 
         .dash-card {
@@ -303,8 +304,8 @@
             display: flex;
             flex-direction: column;
             width: 100%;
-            min-width: 0;
-            overflow: hidden;
+            min-width: 0; /* สำคัญมาก: บังคับไม่ให้ขยายเกินกรอบแม้กราฟจะดัน */
+            overflow: hidden; /* สำคัญมาก: ตัดส่วนที่ล้นทิ้งไป */
         }
 
         .dash-card h3 {
@@ -328,119 +329,106 @@
             color: #222;
         }
 
+        /* --- ล็อกขนาด Canvas ให้ตายตัว --- */
         .chart-container {
             position: relative;
             height: 250px;
             width: 100%;
+            min-width: 0;
         }
         
         .donut-container {
             position: relative;
             height: 200px;
             width: 100%;
-            max-width: 280px; 
+            max-width: 250px; 
             margin: 0 auto;
             display: flex;
             justify-content: center;
+            min-width: 0;
         }
 
         /* ==================================================
-           RESPONSIVE DESIGN 
+           RESPONSIVE DESIGN (ปรับโครงสร้างใหม่ให้แข็งแกร่ง)
            ================================================== */
         
-        /* 1. สำหรับหน้าจอเล็กกว่า Desktop ทั่วไป (เช่น iPad แนวนอน) */
+        /* 1. สำหรับจอขนาดกลาง / จอคอมเล็ก (กว้างไม่เกิน 1200px) */
         @media (max-width: 1200px) {
             .grid-dashboard { grid-template-columns: 1fr 1fr; }
             .grid-dashboard > div:nth-child(3) {
                 grid-column: span 2; 
-                flex-direction: row !important; 
+                flex-direction: row; 
             }
         }
 
-        /* 2. สำหรับ Tablet แนวตั้ง และ โทรศัพท์มือถือแนวนอน */
+        /* 2. สำหรับ Tablet และ มือถือแนวนอน (Landscape) (กว้างไม่เกิน 1024px) */
         @media (max-width: 1024px) {
             .main-title { font-size: 24px; }
             
-            /* ดัน Sidebar ไว้ด้านบนสุด */
+            /* ดัน Sidebar ไปไว้ด้านบนสุด */
             .dashboard-layout { flex-direction: column; }
             .sidebar {
-                width: 100%;
-                height: 60px;
-                flex-direction: row;
-                justify-content: center;
-                padding-top: 0;
-                border-right: none;
-                border-bottom: 1px solid #ddd;
-                position: sticky;
-                top: 0;
-                z-index: 100;
+                width: 100%; height: 60px;
+                flex-direction: row; justify-content: center;
+                padding-top: 0; border-right: none; border-bottom: 1px solid #ddd;
+                position: sticky; top: 0; z-index: 100;
             }
             .dashboard-content { width: 100%; padding: 15px; }
-            .dash-header { flex-direction: row; align-items: center; }
-            .risk-banner { font-size: 22px; margin-bottom: 20px; }
+            .dash-header { flex-wrap: wrap; }
             
-            /* ปรับ Grid เป็น 1 คอลัมน์ยาวลงมา */
-            .grid-dashboard { grid-template-columns: 1fr; }
-            
-            /* กล่องตัวเลข 3 กล่องเรียงแนวนอน */
+            /* เปลี่ยน Grid หลักเป็น 1 คอลัมน์ยาวลงมา */
+            .grid-dashboard { 
+                display: flex;
+                flex-direction: column;
+            }
+
+            /* ใช้ CSS Grid บังคับเรียงแนวนอน 3 กล่อง แทน Flex (กันกราฟล้น) */
             .stat-group {
-                flex-direction: row !important; 
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
             }
-            .stat-group .dash-card {
-                padding: 15px 10px;
-                justify-content: center;
-                align-items: center;
-            }
-            .stat-group h3 {
-                font-size: 13px;
-                margin-bottom: 5px;
-            }
+            .stat-group .dash-card { padding: 15px 10px; justify-content: center; }
+            .stat-group h3 { font-size: 13px; margin-bottom: 5px; }
             .stat-value { font-size: 24px; }
 
-            /* กราฟโดนัท 2 อันเรียงแนวนอน */
+            /* ใช้ CSS Grid บังคับเรียงแนวนอน 2 กล่อง */
             .donut-group {
-                flex-direction: row !important;
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
             }
-            .donut-group .dash-card {
-                padding: 10px;
-            }
-            .donut-container { height: 160px; }
+            .donut-container { height: 160px; max-width: 100%; }
 
-            /* กราฟเส้นและแท่ง เรียงแนวตั้ง */
+            /* กราฟแท่ง/เส้น เรียงลงมาเป็นแนวตั้ง */
             .grid-dashboard > div:nth-child(3) {
-                grid-column: span 1;
-                flex-direction: column !important; 
+                flex-direction: column !important;
             }
+            .chart-container { height: 220px; }
         }
 
-        /* 3. พิเศษ: สำหรับโทรศัพท์มือถือ "แนวนอน" ที่จอเตี้ยมากๆ */
-        @media (max-height: 500px) and (orientation: landscape) {
-            .sidebar { height: 50px; }
-            .dash-header { margin-bottom: 10px; }
-            .chart-container, .donut-container { height: 180px; } /* ลดความสูงกราฟลง */
+        /* 3. สำหรับ โทรศัพท์มือถือแนวตั้ง (Portrait) (กว้างไม่เกิน 768px) */
+        @media (max-width: 768px) {
+            .dash-header { flex-direction: column; align-items: flex-start; }
+            .request-btn { width: 100%; }
+            .risk-banner { font-size: 22px; margin-bottom: 20px; }
+            
+            /* บังคับทุกกล่องเป็น 1 คอลัมน์ (ซ้อนกัน 100%) */
+            .stat-group { grid-template-columns: 1fr; }
+            .donut-group { grid-template-columns: 1fr; }
+            
+            .stat-group .dash-card { padding: 20px; }
+            .stat-group h3 { font-size: 16px; margin-bottom: 10px; }
+            .stat-value { font-size: 32px; }
+
+            .donut-container { height: 220px; }
+            .chart-container { height: 220px; }
         }
 
-        /* 4. สำหรับโทรศัพท์มือถือแนวตั้ง (จอแคบกว่า 600px) */
-        @media (max-width: 600px) {
+        /* 4. สำหรับจอเล็กมากๆ */
+        @media (max-width: 480px) {
             .emp-card { flex-direction: column; text-align: center; padding: 20px 15px; position: relative; }
             .emp-card img { margin: 0 0 15px 0; }
             .emp-info { align-items: center; width: 100%; margin-bottom: 10px; }
             .arrow-btn { position: absolute; bottom: 15px; right: 15px; }
-            
-            .dash-header { flex-direction: column; align-items: flex-start; }
-            .request-btn { width: 100%; }
-
-            /* กล่องตัวเลข เปลี่ยนกลับมาเป็นแนวตั้งสำหรับมือถือจอเล็ก */
-            .stat-group { flex-direction: column !important; }
-            
-            /* กราฟโดนัท เปลี่ยนกลับมาเป็นแนวตั้ง */
-            .donut-group { flex-direction: column !important; }
-            
-            .chart-container { height: 200px; }
-            .donut-container { height: 200px; max-width: 100%; }
-            
-            .stat-group h3 { font-size: 14px; }
-            .stat-value { font-size: 28px; }
         }
     </style>
 </head>
@@ -657,9 +645,18 @@
                 chartsInitialized = true;
             }
 
-            // บังคับให้เบราว์เซอร์จัดเรียงกราฟใหม่เมื่อเปลี่ยนหน้า (แก้กราฟล้นจอ)
+            // บังคับให้เบราว์เซอร์จัดเรียงกราฟใหม่เมื่อเปลี่ยนหน้า
             setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 50);
         }
+
+        // โค้ดนี้เพิ่มมาเพื่อแก้ปัญหากราฟขยายจอเวลาหมุนมือถือ
+        window.addEventListener('resize', function() {
+            if (chartsInitialized) {
+                for (let id in Chart.instances) {
+                    Chart.instances[id].resize();
+                }
+            }
+        });
 
         function requestConsultation(employeeName) {
             alert(`--- ระบบส่งคำขอให้คำปรึกษา ---\n\nกำลังติดต่อไปที่พนักงาน:\n👤 ${employeeName}\n\nสถานะ: ส่งคำร้องเรียบร้อยแล้ว!`);
