@@ -32,7 +32,7 @@
             color: var(--text-main);
             margin: 0;
             padding: 0;
-            overflow-x: hidden; /* ป้องกันการเลื่อนซ้ายขวาบนมือถือ */
+            overflow-x: hidden;
             width: 100%;
         }
 
@@ -288,6 +288,13 @@
             width: 100%;
         }
 
+        /* Group Classes สำหรับจัดโครงสร้างให้ยืดหยุ่น */
+        .stat-group, .chart-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
         .dash-card {
             background-color: #fff;
             border: 1px solid #e0e0e0;
@@ -309,7 +316,7 @@
 
         .stat-block {
             text-align: center;
-            margin-bottom: 15px;
+            margin-bottom: 0;
             flex-grow: 1;
             display: flex;
             flex-direction: column;
@@ -331,20 +338,18 @@
             position: relative;
             height: 200px;
             width: 100%;
-            max-width: 250px; /* บังคับกราฟโดนัทไม่ให้ขยายบวมจนล้นจอ */
+            max-width: 280px; 
             margin: 0 auto;
             display: flex;
             justify-content: center;
         }
 
         /* ==================================================
-           RESPONSIVE DESIGN (ปรับให้รองรับ iPad และมือถือ)
+           RESPONSIVE DESIGN 
            ================================================== */
         
         @media (max-width: 1100px) {
-            .grid-dashboard {
-                grid-template-columns: 1fr 1fr; 
-            }
+            .grid-dashboard { grid-template-columns: 1fr 1fr; }
             .grid-dashboard > div:nth-child(3) {
                 grid-column: span 2; 
                 flex-direction: row !important; 
@@ -367,50 +372,53 @@
                 top: 0;
                 z-index: 100;
             }
-            .dashboard-content {
-                width: 100%;
-                padding: 15px;
-            }
+            .dashboard-content { width: 100%; padding: 15px; }
+            .dash-header { flex-direction: column; align-items: flex-start; }
+            .request-btn { width: 100%; }
+            .risk-banner { font-size: 22px; margin-bottom: 20px; }
             
-            .grid-dashboard { 
-                grid-template-columns: 1fr; 
+            .grid-dashboard { grid-template-columns: 1fr; }
+            
+            /* --- ทำให้กล่อง 3 กล่องเรียงแนวนอนในมือถือ --- */
+            .stat-group {
+                flex-direction: row !important; 
             }
+            .stat-group .dash-card {
+                padding: 15px 10px;
+                justify-content: flex-start;
+            }
+            .stat-group h3 {
+                font-size: 12px;
+                margin-bottom: 5px;
+            }
+            .stat-value { font-size: 20px; }
+
+            /* --- ทำให้กราฟโดนัท 2 อันเรียงแนวนอนในมือถือ --- */
+            .donut-group {
+                flex-direction: row !important;
+            }
+            .donut-group .dash-card {
+                padding: 10px;
+            }
+            .donut-container { height: 140px; }
+
+            /* --- กราฟเส้น/แท่งเรียงแนวตั้งปกติ --- */
             .grid-dashboard > div:nth-child(3) {
                 grid-column: span 1;
                 flex-direction: column !important; 
             }
-
-            .dash-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .request-btn { width: 100%; }
-            
-            .risk-banner { font-size: 22px; margin-bottom: 20px; }
-            .stat-value { font-size: 28px; }
         }
 
         @media (max-width: 480px) {
-            .emp-card {
-                flex-direction: column;
-                text-align: center;
-                padding: 20px 15px;
-                position: relative;
-            }
+            .emp-card { flex-direction: column; text-align: center; padding: 20px 15px; position: relative; }
             .emp-card img { margin: 0 0 15px 0; }
-            .emp-info {
-                align-items: center;
-                width: 100%;
-                margin-bottom: 10px;
-            }
-            .arrow-btn {
-                position: absolute;
-                bottom: 15px;
-                right: 15px;
-            }
-            
+            .emp-info { align-items: center; width: 100%; margin-bottom: 10px; }
+            .arrow-btn { position: absolute; bottom: 15px; right: 15px; }
             .chart-container { height: 200px; }
-            .donut-container { height: 180px; }
+            
+            /* หากหน้าจอมือถือเล็กมาก ย่อฟอนต์ให้อีกเพื่อไม่ให้ล้น */
+            .stat-group h3 { font-size: 10px; }
+            .stat-value { font-size: 16px; }
         }
     </style>
 </head>
@@ -486,7 +494,8 @@
                 <div class="risk-banner risk-red">Burnout Risk: 90 %</div>
 
                 <div class="grid-dashboard">
-                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <!-- กลุ่มที่ 1: กล่องตัวเลข -->
+                    <div class="stat-group">
                         <div class="dash-card stat-block">
                             <h3>Total of inspections</h3>
                             <div class="stat-value">40 Time</div>
@@ -501,7 +510,8 @@
                         </div>
                     </div>
 
-                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <!-- กลุ่มที่ 2: กราฟ Donut -->
+                    <div class="chart-group donut-group">
                         <div class="dash-card">
                             <h3>Burnout risk</h3>
                             <div class="donut-container"><canvas id="weeklyDonut1"></canvas></div>
@@ -512,7 +522,8 @@
                         </div>
                     </div>
 
-                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <!-- กลุ่มที่ 3: กราฟแท่ง (Bar) -->
+                    <div class="chart-group">
                         <div class="dash-card">
                             <h3>Heart rate (BPM)</h3>
                             <div class="chart-container"><canvas id="weeklyBar1"></canvas></div>
@@ -554,7 +565,8 @@
                 <div class="risk-banner risk-green">Burnout Risk: 50 %</div>
 
                 <div class="grid-dashboard">
-                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <!-- กลุ่มที่ 1: กล่องตัวเลข -->
+                    <div class="stat-group">
                         <div class="dash-card stat-block">
                             <h3>Total of inspections</h3>
                             <div class="stat-value">160 Time</div>
@@ -569,7 +581,8 @@
                         </div>
                     </div>
 
-                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <!-- กลุ่มที่ 2: กราฟ Donut -->
+                    <div class="chart-group donut-group">
                         <div class="dash-card">
                             <h3>Burnout risk</h3>
                             <div class="donut-container"><canvas id="monthlyDonut1"></canvas></div>
@@ -580,7 +593,8 @@
                         </div>
                     </div>
 
-                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <!-- กลุ่มที่ 3: กราฟเส้น (Line) -->
+                    <div class="chart-group">
                         <div class="dash-card">
                             <h3>Heart rate (BPM)</h3>
                             <div class="chart-container"><canvas id="monthlyLine1"></canvas></div>
@@ -610,24 +624,19 @@
         let chartsInitialized = false;
 
         function navigateTo(viewId) {
-            // ซ่อนทุกหน้า
             document.querySelectorAll('.view').forEach(view => {
                 view.classList.remove('active');
             });
-            // แสดงหน้าใหม่
             document.getElementById(viewId).classList.add('active');
             window.scrollTo(0, 0);
 
-            // เริ่มต้นกราฟ
             if (!chartsInitialized && (viewId === 'view-weekly' || viewId === 'view-monthly')) {
                 initCharts();
                 chartsInitialized = true;
             }
 
-            // [สำคัญ] บังคับให้เบราว์เซอร์คำนวณและวาดขนาดกราฟใหม่ (แก้ปัญหากราฟล้นจอตอนสลับหน้า)
-            setTimeout(() => {
-                window.dispatchEvent(new Event('resize'));
-            }, 50);
+            // บังคับให้เบราว์เซอร์จัดเรียงกราฟใหม่เมื่อเปลี่ยนหน้า (แก้กราฟล้นจอ)
+            setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 50);
         }
 
         function requestConsultation(employeeName) {
@@ -642,13 +651,13 @@
             const donutOptions = {
                 responsive: true,
                 maintainAspectRatio: false,
-                layout: { padding: 10 }, // เพิ่มพื้นที่ขอบกันกราฟล้น
+                layout: { padding: 5 }, 
                 plugins: {
-                    legend: { position: 'bottom', labels: { font: { size: 12 } } },
+                    legend: { position: 'bottom', labels: { font: { size: 10 }, boxWidth: 10 } },
                     datalabels: {
                         display: true,
                         color: '#ffffff',
-                        font: { weight: 'bold', size: 12 },
+                        font: { weight: 'bold', size: 10 },
                         formatter: function(value) { return value + '%'; }
                     }
                 }
