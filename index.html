@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Burnout Risk Report</title>
+    <!-- ดึงฟอนต์ Kanit -->
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- เชื่อมต่อไฟล์ style.css -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="dashboard">
+        
+        <div class="header-top">
+            <div>
+                Date: <span id="currentDate"></span><br>
+                Time: <span id="currentTime"></span>
+            </div>
+        </div>
+
+        <div class="main-title">
+            Burnout Risk Report for<br>Employee Attendance
+        </div>
+
+        <!-- ================= Card 1 (High Risk) ================= -->
+        <div class="card" id="card1">
+            <div class="card-header" onclick="toggleCard('card1')">
+                <img src="https://via.placeholder.com/100" alt="Profile" class="profile-img">
+                <div class="info">
+                    <div class="high-burnout-tag">High Burnout Rate !</div>
+                    <p class="name">Name: Amika Yodsaeng</p>
+                    <p class="department-name">Department : BNK48 Trainee</p>
+                    <div class="arrival-tag">Arrival Time: 08:30 AM</div>
+                </div>
+                <button class="toggle-btn">V</button>
+            </div>
+
+            <div class="card-body">
+                <div class="risk-banner risk-red">Burnout Risk: 80 %</div>
+                
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-title">Heart Rate (BPM) :</div>
+                        <div class="stat-value">90 bpm</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-title">Facial Burnout Detection :</div>
+                        <div class="stat-value">Burnout 90%</div>
+                    </div>
+                </div>
+
+                <table>
+                    <tr>
+                        <th>Questionnaire</th>
+                        <th>User Response</th>
+                    </tr>
+                    <tr>
+                        <td class="text-left">Q.1 ฉันรู้สึกเหนื่อยล้า หมดพลัง ทั้งพลังทางกายและอารมณ์</td>
+                        <td class="text-high">HIGH</td>
+                    </tr>
+                    <tr>
+                        <td class="text-left">Q.2 ฉันรู้สึกเฉยเมยหรือเห็นอกเห็นใจ ผู้คนน้อยลงอย่างไม่สมเหตุผล</td>
+                        <td class="text-mod">Moderate</td>
+                    </tr>
+                    <tr>
+                        <td class="text-left">Q.3 ฉันรู้สึกในทางลบกับงานในหน้าที่ที่ทำ</td>
+                        <td class="text-low">Low</td>
+                    </tr>
+                </table>
+
+                <div class="request-btn-container">
+                    <button class="request-btn" onclick="requestConsultation('Amika Yodsaeng')">Request<br>consultation</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= Card 2 (Moderate/Green Risk) ================= -->
+        <div class="card" id="card2">
+            <div class="card-header" onclick="toggleCard('card2')">
+                <img src="https://via.placeholder.com/100" alt="Profile" class="profile-img">
+                <div class="info">
+                    <p class="name">Name: Amika Yodsaeng</p>
+                    <p class="department-name">Department : BNK48 Trainee</p>
+                    <div class="arrival-tag">Arrival Time: 08:45 AM</div>
+                </div>
+                <button class="toggle-btn">V</button>
+            </div>
+
+            <div class="card-body">
+                <div class="risk-banner risk-green">Burnout Risk: 80 %</div>
+                
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-title">Heart Rate (BPM) :</div>
+                        <div class="stat-value">80 bpm</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-title">Facial Burnout Detection :</div>
+                        <div class="stat-value">Burnout 50%</div>
+                    </div>
+                </div>
+
+                <table>
+                    <tr>
+                        <th>Questionnaire</th>
+                        <th>User Response</th>
+                    </tr>
+                    <tr>
+                        <td class="text-left">Q.1 ฉันรู้สึกเหนื่อยล้า หมดพลัง ทั้งพลังทางกายและอารมณ์</td>
+                        <td class="text-high">HIGH</td>
+                    </tr>
+                    <tr>
+                        <td class="text-left">Q.2 ฉันรู้สึกเฉยเมยหรือเห็นอกเห็นใจ ผู้คนน้อยลงอย่างไม่สมเหตุผล</td>
+                        <td class="text-mod">Moderate</td>
+                    </tr>
+                    <tr>
+                        <td class="text-left">Q.3 ฉันรู้สึกในทางลบกับงานในหน้าที่ที่ทำ</td>
+                        <td class="text-low">Low</td>
+                    </tr>
+                </table>
+
+                <div class="request-btn-container">
+                    <button class="request-btn" onclick="requestConsultation('Amika Yodsaeng (2)')">Request<br>consultation</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function updateDateTime() {
+            const now = new Date();
+            document.getElementById('currentDate').innerText = now.toLocaleDateString('en-GB');
+            document.getElementById('currentTime').innerText = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        }
+        
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+
+        function toggleCard(cardId) {
+            const card = document.getElementById(cardId);
+            card.classList.toggle('expanded');
+        }
+
+        function requestConsultation(employeeName) {
+            const contactMethods = [
+                "อีเมล (Email)", 
+                "แอปพลิเคชันแชทภายใน (Slack/Teams)", 
+                "เบอร์โทรศัพท์ส่วนตัว (Phone Call)", 
+                "ระบบแจ้งเตือนของ HR (HR Alert System)"
+            ];
+            const randomMethod = contactMethods[Math.floor(Math.random() * contactMethods.length)];
+            
+            alert(`--- ระบบส่งคำขอให้คำปรึกษา ---\n\nกำลังติดต่อไปที่พนักงาน:\n👤 ${employeeName}\n\nระบบสุ่มเลือกช่องทางการติดต่อ:\n📱 ${randomMethod}\n\nสถานะ: ส่งคำร้องเรียบร้อยแล้ว!`);
+        }
+    </script>
+</body>
+</html>
