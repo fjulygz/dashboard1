@@ -1,160 +1,665 @@
+
 <!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Burnout Risk Report</title>
-    <!-- ดึงฟอนต์ Kanit -->
+    <title>Burnout Risk Report Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- เชื่อมต่อไฟล์ style.css -->
-    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    <style>
+        :root {
+            --bg-main: #f4f5f7;
+            --card-bg: #ffffff;
+            --border-blue: #b3b9c5;
+            --hover-gray: #e2e6ea;
+            --text-main: #000000;
+            --red-tag: #cc2929;
+            --blue-tag: #dbe4ff;
+            --blue-text: #2f4073;
+            --sidebar-bg: #ffffff;
+            --btn-red: #cc0000;
+        }
+
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        /* ------------------ View Manager ------------------ */
+        .view {
+            display: none;
+            min-height: 100vh;
+        }
+        .view.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* ------------------ หน้า Main Page ------------------ */
+        .main-container {
+            width: 100%;
+            padding: 20px 5%;
+            box-sizing: border-box;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: flex-end;
+            font-weight: 700;
+            font-size: 16px;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .main-title {
+            text-align: center;
+            font-size: 28px;
+            font-weight: 800;
+            line-height: 1.3;
+            margin-bottom: 40px;
+        }
+
+        /* ปรับจาก Grid เป็น Flex-column เพื่อให้เป็นแนวยาวตามดีไซน์ */
+        .emp-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .emp-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-blue);
+            border-radius: 15px;
+            padding: 20px 30px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+        }
+
+        .emp-card:hover {
+            background-color: var(--hover-gray);
+        }
+
+        .emp-card img {
+            width: 100px;
+            height: 100px;
+            border-radius: 20px;
+            object-fit: cover;
+            margin-right: 30px;
+            background-color: #d3d3d3; /* สีพื้นหลังรูป Placeholder ตามดีไซน์ */
+        }
+
+        .emp-info {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .high-burnout-tag {
+            background-color: var(--red-tag);
+            color: white;
+            font-size: 10px;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .emp-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0 0 5px 0;
+        }
+
+        .emp-dept {
+            font-size: 14px;
+            color: #555;
+            margin: 0 0 12px 0;
+        }
+
+        .arrival-tag {
+            background-color: var(--blue-tag);
+            color: var(--blue-text);
+            font-size: 12px;
+            padding: 4px 15px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
+        .arrow-btn {
+            background-color: #000;
+            color: #fff;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-family: sans-serif;
+            font-weight: bold;
+            border: none;
+            pointer-events: none;
+        }
+
+        /* ------------------ หน้า Dashboard (Weekly & Monthly) ------------------ */
+        .dashboard-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 60px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 20px;
+            flex-shrink: 0;
+        }
+
+        .home-icon {
+            width: 35px;
+            height: 35px;
+            cursor: pointer;
+            fill: #777;
+            transition: fill 0.2s;
+        }
+        .home-icon:hover { fill: #000; }
+
+        .dashboard-content {
+            flex-grow: 1;
+            padding: 20px 40px;
+            width: calc(100% - 60px);
+            box-sizing: border-box;
+        }
+
+        .dash-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 15px;
+        }
+
+        .dash-profile {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .dash-profile img {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            object-fit: cover;
+        }
+        .dash-profile h2 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .request-btn {
+            background-color: var(--btn-red);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-family: 'Kanit', sans-serif;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: background 0.2s;
+            text-align: center;
+            line-height: 1.2;
+        }
+        .request-btn:hover { background-color: #990000; }
+
+        .dash-subheader {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .time-badge {
+            border: 1px solid #ccc;
+            padding: 5px 20px;
+            border-radius: 15px;
+            background-color: #fff;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .nav-arrow {
+            font-size: 30px;
+            color: #b0bec5;
+            cursor: pointer;
+            user-select: none;
+            transition: color 0.2s;
+        }
+        .nav-arrow:hover { color: #546e7a; }
+
+        .risk-banner {
+            text-align: center;
+            font-size: 32px;
+            font-weight: 700;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        .risk-red { background-color: #fcd5df; color: #cc0000; }
+        .risk-green { background-color: #e8f5e9; color: #388e3c; }
+
+        .grid-dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr 2fr;
+            gap: 20px;
+        }
+
+        .dash-card {
+            background-color: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dash-card h3 {
+            margin: 0 0 15px 0;
+            font-size: 16px;
+            font-weight: 400;
+            color: #333;
+        }
+
+        .stat-block {
+            text-align: center;
+            margin-bottom: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: #222;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 250px;
+            width: 100%;
+        }
+        
+        .donut-container {
+            position: relative;
+            height: 200px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* ------------------ RESPONSIVE DESIGN ------------------ */
+        @media (max-width: 1024px) {
+            .grid-dashboard {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        @media (max-width: 768px) {
+            .main-title { font-size: 24px; }
+            .grid-dashboard { grid-template-columns: 1fr; }
+            
+            /* Responsive สำหรับ Card พนักงาน */
+            .emp-card {
+                flex-direction: column;
+                text-align: center;
+                padding: 20px;
+                position: relative;
+            }
+            .emp-card img {
+                margin: 0 0 15px 0;
+            }
+            .emp-info {
+                align-items: center;
+                margin-bottom: 15px;
+            }
+            .arrow-btn {
+                position: absolute;
+                bottom: 20px;
+                right: 20px;
+            }
+
+            /* Responsive สำหรับ Dashboard Sidebar */
+            .dashboard-layout {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                height: 60px;
+                flex-direction: row;
+                justify-content: center;
+                padding-top: 0;
+                border-right: none;
+                border-bottom: 1px solid #ddd;
+            }
+            .dashboard-content {
+                width: 100%;
+                padding: 15px;
+            }
+            .dash-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
 </head>
 <body>
 
-    <div class="dashboard">
-        
-        <div class="header-top">
-            <div>
-                Date: <span id="currentDate"></span><br>
-                Time: <span id="currentTime"></span>
-            </div>
-        </div>
-
-        <div class="main-title">
-            Burnout Risk Report for<br>Employee Attendance
-        </div>
-
-        <!-- ================= Card 1 (High Risk) ================= -->
-        <div class="card" id="card1">
-            <div class="card-header" onclick="toggleCard('card1')">
-                <img src="https://via.placeholder.com/100" alt="Profile" class="profile-img">
-                <div class="info">
-                    <div class="high-burnout-tag">High Burnout Rate !</div>
-                    <p class="name">Name: Amika Yodsaeng</p>
-                    <p class="department-name">Department : BNK48 Trainee</p>
-                    <div class="arrival-tag">Arrival Time: 08:30 AM</div>
+    <!-- ========================================== -->
+    <!-- VIEW 1: หน้า MAIN -->
+    <!-- ========================================== -->
+    <div id="view-main" class="view active">
+        <div class="main-container">
+            <div class="header-top">
+                <div>
+                    Date: <span id="currentDate"></span><br>
+                    Time: <span id="currentTime"></span>
                 </div>
-                <button class="toggle-btn">V</button>
             </div>
 
-            <div class="card-body">
-                <div class="risk-banner risk-red">Burnout Risk: 80 %</div>
+            <div class="main-title">
+                Burnout Risk Report for<br>Employee Attendance
+            </div>
+
+            <div class="emp-grid">
+                <!-- Card 1 -->
+                <div class="emp-card" onclick="navigateTo('view-weekly')">
+                    <img src="https://via.placeholder.com/100" alt="Profile">
+                    <div class="emp-info">
+                        <div class="high-burnout-tag">High Burnout Rate !</div>
+                        <p class="emp-name">Name: Amika Yodsaeng</p>
+                        <p class="emp-dept">Department : BNK48 Trainee</p>
+                        <div class="arrival-tag">Arrival Time: 08:30 AM</div>
+                    </div>
+                    <button class="arrow-btn">V</button>
+                </div>
                 
-                <div class="stats-grid">
-                    <div class="stat-box">
-                        <div class="stat-title">Heart Rate (BPM) :</div>
-                        <div class="stat-value">90 bpm</div>
+                <!-- Card 2 -->
+                <div class="emp-card" onclick="navigateTo('view-weekly')">
+                    <img src="https://via.placeholder.com/100" alt="Profile">
+                    <div class="emp-info">
+                        <!-- ไม่มี High Burnout Tag สำหรับคนนี้ -->
+                        <p class="emp-name" style="margin-top: 25px;">Name: Amika Yodsaeng</p>
+                        <p class="emp-dept">Department : BNK48 Trainee</p>
+                        <div class="arrival-tag">Arrival Time: 08:45 AM</div>
                     </div>
-                    <div class="stat-box">
-                        <div class="stat-title">Facial Burnout Detection :</div>
-                        <div class="stat-value">Burnout 90%</div>
-                    </div>
-                </div>
-
-                <table>
-                    <tr>
-                        <th>Questionnaire</th>
-                        <th>User Response</th>
-                    </tr>
-                    <tr>
-                        <td class="text-left">Q.1 ฉันรู้สึกเหนื่อยล้า หมดพลัง ทั้งพลังทางกายและอารมณ์</td>
-                        <td class="text-high">HIGH</td>
-                    </tr>
-                    <tr>
-                        <td class="text-left">Q.2 ฉันรู้สึกเฉยเมยหรือเห็นอกเห็นใจ ผู้คนน้อยลงอย่างไม่สมเหตุผล</td>
-                        <td class="text-mod">Moderate</td>
-                    </tr>
-                    <tr>
-                        <td class="text-left">Q.3 ฉันรู้สึกในทางลบกับงานในหน้าที่ที่ทำ</td>
-                        <td class="text-low">Low</td>
-                    </tr>
-                </table>
-
-                <div class="request-btn-container">
-                    <button class="request-btn" onclick="requestConsultation('Amika Yodsaeng')">Request<br>consultation</button>
+                    <button class="arrow-btn">V</button>
                 </div>
             </div>
         </div>
-
-        <!-- ================= Card 2 (Moderate/Green Risk) ================= -->
-        <div class="card" id="card2">
-            <div class="card-header" onclick="toggleCard('card2')">
-                <img src="https://via.placeholder.com/100" alt="Profile" class="profile-img">
-                <div class="info">
-                    <p class="name">Name: Amika Yodsaeng</p>
-                    <p class="department-name">Department : BNK48 Trainee</p>
-                    <div class="arrival-tag">Arrival Time: 08:45 AM</div>
-                </div>
-                <button class="toggle-btn">V</button>
-            </div>
-
-            <div class="card-body">
-                <div class="risk-banner risk-green">Burnout Risk: 80 %</div>
-                
-                <div class="stats-grid">
-                    <div class="stat-box">
-                        <div class="stat-title">Heart Rate (BPM) :</div>
-                        <div class="stat-value">80 bpm</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-title">Facial Burnout Detection :</div>
-                        <div class="stat-value">Burnout 50%</div>
-                    </div>
-                </div>
-
-                <table>
-                    <tr>
-                        <th>Questionnaire</th>
-                        <th>User Response</th>
-                    </tr>
-                    <tr>
-                        <td class="text-left">Q.1 ฉันรู้สึกเหนื่อยล้า หมดพลัง ทั้งพลังทางกายและอารมณ์</td>
-                        <td class="text-high">HIGH</td>
-                    </tr>
-                    <tr>
-                        <td class="text-left">Q.2 ฉันรู้สึกเฉยเมยหรือเห็นอกเห็นใจ ผู้คนน้อยลงอย่างไม่สมเหตุผล</td>
-                        <td class="text-mod">Moderate</td>
-                    </tr>
-                    <tr>
-                        <td class="text-left">Q.3 ฉันรู้สึกในทางลบกับงานในหน้าที่ที่ทำ</td>
-                        <td class="text-low">Low</td>
-                    </tr>
-                </table>
-
-                <div class="request-btn-container">
-                    <button class="request-btn" onclick="requestConsultation('Amika Yodsaeng (2)')">Request<br>consultation</button>
-                </div>
-            </div>
-        </div>
-
     </div>
 
+    <!-- ========================================== -->
+    <!-- VIEW 2: หน้า WEEKLY (รายสัปดาห์) -->
+    <!-- ========================================== -->
+    <div id="view-weekly" class="view">
+        <div class="dashboard-layout">
+            <div class="sidebar">
+                <svg class="home-icon" onclick="navigateTo('view-main')" viewBox="0 0 24 24">
+                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                </svg>
+            </div>
+            <div class="dashboard-content">
+                <div class="dash-header">
+                    <div class="dash-profile">
+                        <img src="https://via.placeholder.com/50" alt="Profile">
+                        <h2>Amika Yodsaeng</h2>
+                    </div>
+                    <button class="request-btn" onclick="requestConsultation('Amika Yodsaeng')">Request<br>consultation</button>
+                </div>
+
+                <div class="dash-subheader">
+                    <div class="time-badge">Weekly</div>
+                    <div class="nav-arrow" onclick="navigateTo('view-monthly')">➔</div>
+                </div>
+
+                <div class="risk-banner risk-red">Burnout Risk: 90 %</div>
+
+                <div class="grid-dashboard">
+                    <div style="display: flex; flex-direction: column; gap: 20px;">
+                        <div class="dash-card stat-block">
+                            <h3>Total of inspections</h3>
+                            <div class="stat-value">40 Time</div>
+                        </div>
+                        <div class="dash-card stat-block">
+                            <h3>Neutral 1 Time</h3>
+                            <div class="stat-value">10%</div>
+                        </div>
+                        <div class="dash-card stat-block">
+                            <h3>Burnout 79 Time</h3>
+                            <div class="stat-value">90%</div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 20px;">
+                        <div class="dash-card">
+                            <h3>Burnout risk</h3>
+                            <div class="donut-container"><canvas id="weeklyDonut1"></canvas></div>
+                        </div>
+                        <div class="dash-card">
+                            <h3>Questionnaire</h3>
+                            <div class="donut-container"><canvas id="weeklyDonut2"></canvas></div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 20px;">
+                        <div class="dash-card">
+                            <h3>Heart rate (BPM)</h3>
+                            <div class="chart-container"><canvas id="weeklyBar1"></canvas></div>
+                        </div>
+                        <div class="dash-card">
+                            <h3>Facial Burnout Detection</h3>
+                            <div class="chart-container"><canvas id="weeklyBar2"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- VIEW 3: หน้า MONTHLY (รายเดือน) -->
+    <!-- ========================================== -->
+    <div id="view-monthly" class="view">
+        <div class="dashboard-layout">
+            <div class="sidebar">
+                <svg class="home-icon" onclick="navigateTo('view-main')" viewBox="0 0 24 24">
+                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                </svg>
+            </div>
+            <div class="dashboard-content">
+                <div class="dash-header">
+                    <div class="dash-profile">
+                        <img src="https://via.placeholder.com/50" alt="Profile">
+                        <h2>Amika Yodsaeng</h2>
+                    </div>
+                    <button class="request-btn" onclick="requestConsultation('Amika Yodsaeng')">Request<br>consultation</button>
+                </div>
+
+                <div class="dash-subheader">
+                    <div class="time-badge">Monthly</div>
+                    <div class="nav-arrow" onclick="navigateTo('view-weekly')">🡨</div>
+                </div>
+
+                <div class="risk-banner risk-green">Burnout Risk: 50 %</div>
+
+                <div class="grid-dashboard">
+                    <div style="display: flex; flex-direction: column; gap: 20px;">
+                        <div class="dash-card stat-block">
+                            <h3>Total of inspections</h3>
+                            <div class="stat-value">160 Time</div>
+                        </div>
+                        <div class="dash-card stat-block">
+                            <h3>Neutral 90 Time</h3>
+                            <div class="stat-value">80%</div>
+                        </div>
+                        <div class="dash-card stat-block">
+                            <h3>Burnout 60 Time</h3>
+                            <div class="stat-value">20%</div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 20px;">
+                        <div class="dash-card">
+                            <h3>Burnout risk</h3>
+                            <div class="donut-container"><canvas id="monthlyDonut1"></canvas></div>
+                        </div>
+                        <div class="dash-card">
+                            <h3>Questionnaire</h3>
+                            <div class="donut-container"><canvas id="monthlyDonut2"></canvas></div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 20px;">
+                        <div class="dash-card">
+                            <h3>Heart rate (BPM)</h3>
+                            <div class="chart-container"><canvas id="monthlyLine1"></canvas></div>
+                        </div>
+                        <div class="dash-card">
+                            <h3>Facial Burnout Detection</h3>
+                            <div class="chart-container"><canvas id="monthlyLine2"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- JAVASCRIPT LOGIC -->
+    <!-- ========================================== -->
     <script>
         function updateDateTime() {
             const now = new Date();
             document.getElementById('currentDate').innerText = now.toLocaleDateString('en-GB');
             document.getElementById('currentTime').innerText = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         }
-        
         updateDateTime();
         setInterval(updateDateTime, 1000);
 
-        function toggleCard(cardId) {
-            const card = document.getElementById(cardId);
-            card.classList.toggle('expanded');
+        let chartsInitialized = false;
+
+        function navigateTo(viewId) {
+            document.querySelectorAll('.view').forEach(view => {
+                view.classList.remove('active');
+            });
+            document.getElementById(viewId).classList.add('active');
+            window.scrollTo(0, 0);
+
+            if (!chartsInitialized && (viewId === 'view-weekly' || viewId === 'view-monthly')) {
+                initCharts();
+                chartsInitialized = true;
+            }
         }
 
         function requestConsultation(employeeName) {
-            const contactMethods = [
-                "อีเมล (Email)", 
-                "แอปพลิเคชันแชทภายใน (Slack/Teams)", 
-                "เบอร์โทรศัพท์ส่วนตัว (Phone Call)", 
-                "ระบบแจ้งเตือนของ HR (HR Alert System)"
-            ];
-            const randomMethod = contactMethods[Math.floor(Math.random() * contactMethods.length)];
-            
-            alert(`--- ระบบส่งคำขอให้คำปรึกษา ---\n\nกำลังติดต่อไปที่พนักงาน:\n👤 ${employeeName}\n\nระบบสุ่มเลือกช่องทางการติดต่อ:\n📱 ${randomMethod}\n\nสถานะ: ส่งคำร้องเรียบร้อยแล้ว!`);
+            alert(`--- ระบบส่งคำขอให้คำปรึกษา ---\n\nกำลังติดต่อไปที่พนักงาน:\n👤 ${employeeName}\n\nสถานะ: ส่งคำร้องเรียบร้อยแล้ว!`);
+        }
+
+        function initCharts() {
+            Chart.defaults.font.family = "'Kanit', sans-serif";
+            Chart.register(ChartDataLabels);
+            Chart.defaults.set('plugins.datalabels', { display: false });
+
+            const donutOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    datalabels: {
+                        display: true,
+                        color: '#ffffff',
+                        font: { weight: 'bold', size: 14 },
+                        formatter: function(value) { return value + '%'; }
+                    }
+                }
+            };
+
+            // Weekly Charts
+            new Chart(document.getElementById('weeklyDonut1'), {
+                type: 'doughnut',
+                data: { labels: ['Burnout', 'Neutral'], datasets: [{ data: [90, 10], backgroundColor: ['#cc0000', '#4caf50'], borderWidth: 0 }] },
+                options: donutOptions
+            });
+
+            new Chart(document.getElementById('weeklyDonut2'), {
+                type: 'doughnut',
+                data: { labels: ['High', 'Moderate', 'Low'], datasets: [{ data: [50, 33.3, 16.7], backgroundColor: ['#cc0000', '#fdd835', '#4caf50'], borderWidth: 0 }] },
+                options: donutOptions
+            });
+
+            new Chart(document.getElementById('weeklyBar1'), {
+                type: 'bar',
+                data: { labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], datasets: [{ label: 'BPM', data: [150, 80, 95, 85, 95], backgroundColor: ['#a984ed', '#7e5fcc', '#4c4298', '#262873', '#00134d'], borderRadius: 5 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 200 } } }
+            });
+
+            new Chart(document.getElementById('weeklyBar2'), {
+                type: 'bar',
+                data: { labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], datasets: [{ label: 'Score', data: [100, 80, 95, 85, 95], backgroundColor: ['#a984ed', '#7e5fcc', '#4c4298', '#262873', '#00134d'], borderRadius: 5 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 100 } } }
+            });
+
+            // Monthly Charts
+            new Chart(document.getElementById('monthlyDonut1'), {
+                type: 'doughnut',
+                data: { labels: ['Neutral', 'Burnout'], datasets: [{ data: [80, 20], backgroundColor: ['#4caf50', '#cc0000'], borderWidth: 0 }] },
+                options: donutOptions
+            });
+
+            new Chart(document.getElementById('monthlyDonut2'), {
+                type: 'doughnut',
+                data: { labels: ['High', 'Moderate', 'Low'], datasets: [{ data: [50, 33.3, 16.7], backgroundColor: ['#cc0000', '#fdd835', '#4caf50'], borderWidth: 0 }] },
+                options: donutOptions
+            });
+
+            new Chart(document.getElementById('monthlyLine1'), {
+                type: 'line',
+                data: { labels: Array.from({length: 30}, (_, i) => i + 1), datasets: [{ label: 'BPM', data: [150, 50, 90, 95, 80, 85, 70, 65, 75, 60, 85, 80, 95, 85, 75, 65, 80, 95, 60, 70, 75, 85, 90, 65, 80, 85, 75, 90, 80, 85], borderColor: '#0d47a1', backgroundColor: '#0d47a1', tension: 0.1, pointRadius: 3 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 200 } } }
+            });
+
+            new Chart(document.getElementById('monthlyLine2'), {
+                type: 'line',
+                data: { labels: Array.from({length: 30}, (_, i) => i + 1), datasets: [{ label: 'Score', data: [150, 50, 90, 95, 80, 85, 70, 65, 75, 60, 85, 80, 95, 85, 75, 65, 80, 95, 60, 70, 65, 75, 80, 70, 85, 90, 75, 85, 90, 80], borderColor: '#0d47a1', backgroundColor: '#0d47a1', tension: 0.1, pointRadius: 3 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 200 } } }
+            });
         }
     </script>
 </body>
 </html>
+<div class="table-responsive">
+    <table>
+        <!-- โค้ด <thead> <tbody> <tr> <td> ของคุณอยู่ที่นี่ -->
+    </table>
+</div>
